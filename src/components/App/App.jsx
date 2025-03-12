@@ -1,54 +1,52 @@
 import { useState, useEffect } from "react";
-import css from "./App.module.css"
-import Description from "../Description/Description";
-import Feedback from "../Feedback/Feedback";
-import Options from "../Options/Options";
-import Notification  from "../Notification/Notification";
+import ContactForm from "../ContactForm/ContactForm";
+import SearchBox from "../SearchBox/SearchBox";
+import ContactList from "../ContactList/ContactList"
+import css from "./App.module.css";
+
 
 export default function App() {
-  const [countClicks, setcountClicks] = useState(() => {
-    const savedFeedback = localStorage.getItem("saved-feedback");
-    if (savedFeedback !== null) {
-      return JSON.parse(savedFeedback);
+  const [usersData, setUsersData] = useState(() => {
+    const savedUsers = localStorage.getItem("saved-users");
+    if (savedUsers !== null) {
+      return JSON.parse(savedUsers);
     }
-      return {
-        good: 0,
-        neutral: 0,
-        bad: 0,
-      };
+    return [
+    { id: "id-1", name: "Rosie Simpson", number: "459-12-56" },
+    { id: "id-2", name: "Hermione Kline", number: "443-89-12" },
+    { id: "id-3", name: "Eden Clements", number: "645-17-79" },
+    { id: "id-4", name: "Annie Copeland", number: "227-91-26" },
+  ]
   });
-  
-  const totalFeedback = countClicks.good + countClicks.neutral + countClicks.bad;
-  const positiveFeedback = Math.round((countClicks.good / totalFeedback) * 100);
-  
-  const updateFeedback = (feedbackType) => {
-          setcountClicks({
-            ...countClicks,
-            [feedbackType]: countClicks[feedbackType] + 1,
-          });
+
+  const [filter, setFilter] = useState('');
+
+  const addUser = (newUser) => {
+    setUsersData((prevUsers) => {
+      return [...prevUsers, newUser];
+    });
+    console.log(newUser);
   };
-  
+
+  const deleteUser = (userId) => {
+    setUsersData((prevUsers) => {
+      return prevUsers.filter((user) => user.id !== userId);
+    });
+  };
+
+  const visibleUser = usersData.filter(user => user.name.toLowerCase().includes(filter.toLowerCase()));
+
   useEffect(() => {
-    localStorage.setItem("saved-feedback", JSON.stringify(countClicks));
-  }, [countClicks]);
+    localStorage.setItem("saved-users", JSON.stringify(usersData));
+  }, [usersData]);
 
   return (
     <div className={css.container}>
-      <Description />
-      <Options
-        onUpdate={updateFeedback}
-        totalFeedback={totalFeedback}
-        droppingState={setcountClicks}
-      />
-      {totalFeedback !== 0 ? (
-        <Feedback
-          count={countClicks}
-          totalFeedback={totalFeedback}
-          positiveFeedback={positiveFeedback}
-        />
-      ) : (
-        <Notification />
-      )}
+      <h1 className={css.title}>Phonebook</h1>
+      <ContactForm onAdd={addUser} />
+      <SearchBox onFilter={setFilter} value={filter} />
+      <ContactList users={visibleUser} onDelete={deleteUser} />
     </div>
   );
-};
+
+}
