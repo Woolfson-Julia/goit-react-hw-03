@@ -25,7 +25,6 @@ export default function App() {
     setUsersData((prevUsers) => {
       return [...prevUsers, newUser];
     });
-    console.log(newUser);
   };
 
   const deleteUser = (userId) => {
